@@ -5,7 +5,7 @@
 struct hashTable{ 
   bool isFree; 
   int key; 
-  std::string value; 
+  std::string value;  
 
   hashTable(){ 
     this -> isFree = true; 
@@ -121,6 +121,16 @@ class unordered_map{
       
       throw keyError(); 
     }
+
+    /* 
+    int hashCode(int key, std::string value){ 
+      std::size_t hash = std::hash<std::string>{}(value); 
+
+      std::cout << hash << ' ' << hash % capacity << std::endl; 
+
+      return hash; 
+    }
+    */ 
 
     void remove(int key){ 
       int index = hashIndex(key); 
