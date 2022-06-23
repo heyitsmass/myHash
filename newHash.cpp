@@ -1,8 +1,5 @@
 #include <iostream> 
 
-using namespace std; 
-
-
 template<class Key, class Value>
 struct hashTable{ 
   Key key; 
@@ -10,23 +7,9 @@ struct hashTable{
   bool isFree; 
   int hash; 
 
-  hashTable(){ 
-    isFree = true; 
-  }
-
-  hashTable(Key k, Value v){ 
-    key = k; 
-    value = v; 
-    isFree = false; 
-    hash = -1; 
-  }
-
-  hashTable(Key k, Value v, int h){ 
-    key = k; 
-    value = v; 
-    isFree = false; 
-    hash = h; 
-  }
+  hashTable(): isFree(true) {}; 
+  hashTable(Key k, Value v): key(k), value(v), isFree(false) {}; 
+  hashTable(Key k, Value v, int h): key(k), value(v), isFree(false), hash(h) {}; 
 
 }; 
 
@@ -42,66 +25,129 @@ class unordered_map{
   int capacity; 
   int load; 
   hashTable<Key, Value>* table; 
+  
+  /*
+  static_assert(is_same<Key, int>::value || 
+                is_same<Key, string>::value || 
+                is_same<Key, bool>::value,
 
-  static_assert(is_same<Key, int>::value || is_same<Key, string>::value || is_same<Key, bool>::value,
                 "Error: input type for key is not hashable"); 
+  */ 
+
+    int hash_index(size_t val, int offset = 0){ 
+      return (val + offset) % this -> capacity;
+    }
+
+    size_t hash_code(Key key){ 
+      return std::hash<Key>()(key); 
+    }
+
+    void resize(){ 
+
+      hashTable<Key, Value>* old = this -> table; 
+      int old_size = this -> capacity; 
+
+      this -> capacity = capacity += (capacity*2)/3; 
+
+      delete [] this -> table; 
+
+      this -> table = new hashTable<Key, Value>[this -> capacity]; 
+      this -> load = 0; 
+
+      for(int i = 0; i < old_size; i++)
+        this -> put(old[i].key, old[i].value); 
+
+    }
 
   public: 
 
     unordered_map(){ 
-      this -> capacity = 16; 
+      this -> capacity = 4; 
       this -> load = 0; 
 
       this -> table = new hashTable<Key, Value>[this -> capacity];
-
-      cout << "Allocated Array" << endl; 
     }
 
-    bool put(Key key, Value value){ 
+    void put(Key key, Value value){ 
+      //Resize if necessary
       if(this -> load >= this -> capacity) this -> resize(); 
 
       size_t hash = this -> hash_code(key);  
       int index = this -> hash_index(hash);  
 
-      cout << hash << ' ' << index << endl; 
+      if(!table[index].isFree){
+        //Update the value if the key matches
+        if(table[index].key == key){ 
+          table[index].value = value; 
+          return; 
+        }
 
-      if(!table[index].isFree)
-
+        //Probe for available index
+        for(int i =0; i < this -> capacity; ++i)
+          if(table[this -> hash_index(hash, i)].isFree){ 
+            index = this -> hash_index(hash, i); 
+            break;
+          }
+      }
+      
+      table[index] = hashTable<Key, Value>(key, value, hash); 
+      ++load; 
     }
 
     Value get(Key key){ 
-      return table[0].value; 
+      size_t hash = this -> hash_code(key); 
+      int index = this -> hash_index(hash); 
 
+      if(table[index].key != key){
+        //Probe for matching key
+        for(int i = 0; i < this -> capacity; ++i)
+          if(table[this -> hash_index(hash, i)].key == key)
+            return table[this -> hash_index(hash, i)].value; 
+
+        delete [] table; 
+        table = nullptr; 
+        throw keyError(); 
+      }
+      return table[index].value; 
     }
 
-    int hash_index(int val, int offset = 0){ 
-      return (val + offset) % this -> capacity;
-    }
+    void remove(int key){ 
+      size_t hash = hash_code(key); 
+      int index = hash_index(hash); 
 
-    size_t hash_code(Key key){ 
-      return hash<Key>{}(key); 
-    }
+      if(table[index].key != key){ 
+        //Probe for matching key 
+        for(int i =0; i < this -> capacity; ++i)
+          if(table[i].key == key){ 
+            index = i;
+            break; 
+          }
+        throw keyError(); 
+      }
 
-    void resize(){ 
-      ; 
+      table[index] = hashTable<Key, Value>(); 
+      --load; 
     }
 
     ~unordered_map(){ 
       delete [] table; 
       table = nullptr; 
-      cout << "Deallocated Array" << endl; 
     }
 }; 
 
 int main(){ 
 
-  unordered_map<string, string> map; 
+  unordered_map<int, std::string> map; 
 
-  map.put("brandon", "cannon"); 
+  for(int i = 0; i <= 5; i++){ 
+    map.put(i, "test"); 
+  }
   
-  cout << map.get("cannon") << endl; 
+  std::cout << map.get(3) << std::endl; 
 
+  map.remove(3); 
 
+  std::cout << map.get(3) << std::endl; 
 
   return 0; 
 }
