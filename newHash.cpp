@@ -13,7 +13,7 @@ struct hashTable{
 
 }; 
 
-class keyError : public std::exception { 
+class KeyError : public std::exception { 
   public: 
     std::string what(){ 
       return "Error: Key does not exist in map";
@@ -51,7 +51,7 @@ class unordered_map{
 
       delete [] this -> table; 
 
-      this -> table = new hashTable<Key, Value>[this -> capacity]; 
+      this -> table = new hashTable<Key, Value>[this -> capacity];  
       this -> load = 0; 
 
       for(int i = 0; i < old_size; i++)
@@ -62,10 +62,10 @@ class unordered_map{
   public: 
 
     unordered_map(){ 
-      this -> capacity = 4; 
+      this -> capacity = 8; 
       this -> load = 0; 
 
-      this -> table = new hashTable<Key, Value>[this -> capacity];
+      this -> table = new hashTable<Key, Value>[this -> capacity];  
     }
 
     void put(Key key, Value value){ 
@@ -106,7 +106,7 @@ class unordered_map{
 
         delete [] table; 
         table = nullptr; 
-        throw keyError(); 
+        throw KeyError(); 
       }
       return table[index].value; 
     }
@@ -122,7 +122,9 @@ class unordered_map{
             index = i;
             break; 
           }
-        throw keyError(); 
+        delete[] table; 
+        table = nullptr; 
+        throw KeyError(); 
       }
 
       table[index] = hashTable<Key, Value>(); 
@@ -137,17 +139,17 @@ class unordered_map{
 
 int main(){ 
 
-  unordered_map<int, std::string> map; 
+  unordered_map<int, int> map; 
 
-  for(int i = 0; i <= 5; i++){ 
-    map.put(i, "test"); 
+  for(int i =0; i <=5; i++){ 
+    map.put(i, i); 
   }
-  
-  std::cout << map.get(3) << std::endl; 
 
-  map.remove(3); 
+  std::cout << map.get(1) << std::endl; 
 
-  std::cout << map.get(3) << std::endl; 
+  map.remove(1); 
+
+  //std::cout << map.get(1) << std::endl; 
 
   return 0; 
 }
