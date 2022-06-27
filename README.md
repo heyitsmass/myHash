@@ -59,3 +59,5 @@ myHash is intended to demonstrate my ability to construct a hash map in c++.
   //Added proxy class as intermediary for [] operations 
   
 ```
+### Valgrind Summary 
+![a3129ea6304a4869b88fc66ad1b88c3d](https://user-images.githubusercontent.com/58617118/175980331-57fbbfb4-3e39-48ac-acf9-34f01b465a10.png)
