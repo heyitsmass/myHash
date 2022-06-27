@@ -40,6 +40,8 @@ myHash is intended to demonstrate my ability to construct a hash map in c++.
   // Optimize probing function (potentially modify to chaining) 
   
   // Move classes into header / .cpp files 
+  
+  // Memory usage reductions
 
 ```
 
