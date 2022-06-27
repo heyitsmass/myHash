@@ -1,7 +1,5 @@
 #include <iostream> 
 
-using namespace std; 
-
 class KeyError : public std::exception {}; 
 
 template<class Key, class Value> 
@@ -37,7 +35,7 @@ class unordered_map{
     return -1; 
   }
 
-  void _resize(){ 
+  void resize(){ 
     hash_entry<Key, Value>* old = this -> table; 
     int old_size = this -> capacity; 
 
@@ -52,64 +50,75 @@ class unordered_map{
       this -> set(old[i].key, old[i].value); 
   }
 
-  public: 
-    class proxy{ 
+  Value get(Key key){ 
+    int index = _get(key); 
+    if(table[index].key == key)
+      return table[index].value;
+    delete[] table; 
+    table = nullptr; 
+    throw KeyError(); 
+  }
 
-      /*
-      public: 
-      void operator=(Value value){ 
-        ;
+  void set(Key key, Value value){ 
+    if(load >= capacity) resize(); 
+
+    int index = _get(key); 
+
+    if(table[index].is_free)
+      table[index] = hash_entry<Key, Value>(key, value); 
+    else 
+      table[index].value = value; 
+
+  }
+
+  class proxy{
+
+      unordered_map<Key, Value>& map; 
+      Key key; 
+      
+    public:
+      proxy(unordered_map<Key, Value>& m, Key k): map(m), key(k){};  
+
+      operator Value() const{ 
+        return map.get(this->key); 
       }
-      */ 
 
-    };
+      void operator=(Value value){ 
+        map.set(this->key, value); 
+      }
 
+  };
+
+
+  int hash_index(size_t hash_code, int offset = 0){ 
+    return (hash_code + offset) % capacity; 
+  }
+
+  public: 
     unordered_map(){ 
       this -> capacity = 8; 
       this -> load = 0; 
       this -> table = new hash_entry<Key, Value>[capacity];
     }
 
-    Value get(Key key){ 
-      int index = _get(key); 
-      if(table[index].key == key)
-        return table[index].value;
-      //delete[] table; 
-      //table = nullptr; 
-      throw KeyError(); 
-    }
-
-    void set(Key key, Value value){ 
-      if(load >= capacity) _resize(); 
-
-      int index = _get(key); 
-
-      if(table[index].is_free)
-        table[index] = hash_entry<Key, Value>(key, value); 
-      else 
-        table[index].value = value; 
-
-    }
-
     void remove(Key key){ 
       int index = _get(key); 
       if(table[index].key != key){ 
-        //delete[] table; 
-        //table = nullptr;
+        delete[] table; 
+        table = nullptr;
         throw KeyError(); 
       } 
       table[index] = hash_entry<Key, Value>(); 
       --load; 
     }
-
-    int hash_index(size_t hash_code, int offset = 0){ 
-      return (hash_code + offset) % capacity; 
-    }
-
-    /* 
+ 
     proxy operator[](Key key){ 
       return proxy(*this, key); 
-    } */ 
+    } 
+
+    friend std::ostream& operator<< (std::ostream& os, proxy p){ 
+      return os << p.operator Value(); 
+    }
 
     ~unordered_map(){ 
       delete[] table; 
@@ -119,11 +128,14 @@ class unordered_map{
 
 int main(){ 
 
-  unordered_map<string, string> map; 
+  unordered_map<std::string,std::string> map; 
   
-  //map["string"] = "value"; 
+  map["string"] = "value"; 
 
-  //cout << map["string"] << endl; 
+  std::string something = map["string"]; 
+
+  std::cout << map["string"] << ' ' << something << ' ' << std::endl; 
+
 
   return 0; 
 }
