@@ -62,7 +62,7 @@ class unordered_map{
   public: 
 
     unordered_map(){ 
-      this -> capacity = 4; 
+      this -> capacity = 8; 
       this -> load = 0; 
 
       this -> table = new hashTable<Key, Value>[this -> capacity];
@@ -118,7 +118,7 @@ class unordered_map{
       if(table[index].key != key){ 
         //Probe for matching key 
         for(int i =0; i < this -> capacity; ++i)
-          if(table[i].key == key){ 
+          if(table[this -> hash_index(hash, i)].key == key){ 
             index = i;
             break; 
           }
