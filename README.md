@@ -6,32 +6,24 @@ myHash is intended to demonstrate my ability to construct a hash map in c++.
 ### Usage(s): 
 ```cpp
  int main(int argv, char** argc){ 
-   unordered_map<int, std::string> map;
+ 
+   /* Tested type combinations (limited by hashable types):
+      <string, string> 
+      <int, string> 
+      <string, int> 
+   */ 
    
-   const int n = 5; //Forces resize 
-    
-   for(int i=0; i <= n; ++i) 
-     map.put(i, "test_" + to_string(i)); 
-    
-   std::cout << map.get(3) << std::endl; 
+   unordered_map<std::string, std::string> map; 
    
-   map.remove(3); 
+   map["key"] = "value"; 
    
-   std::cout << map.get(3) << std::endl; // Throws KeyError
+   cout << map["key"] << endl; 
+   auto value = map["key"]; 
    
-   myHash<std::string, int> map2; 
+   map.remove("key"); 
    
-   for(int i=0; i <= n; ++i){
-     
-     map2.put("test_" + to_string(i), i); 
-   } 
-   
-   std::cout << map2.get("test_3") << std::endl; 
-   
-   map2.remove("test_3"); 
-   
-   std::cout << map2.get("test_3") << std::endl; // Throws KeyError
-    
+   cout << map["key"] << endl; //Throws KeyError
+
    return 0; 
  } 
  
@@ -40,14 +32,34 @@ myHash is intended to demonstrate my ability to construct a hash map in c++.
 ### Anticipated Design Changes:
 
 ```cpp
-  map.put(key, value); // Changes to map[key] = value; 
-  
-  map.get(key); // Changes to map[key]; 
-  
+
   map.remove(key); // Method left, add map[key] = NULL/None 
   
   // Add rehash function
   
   // Optimize probing function (potentially modify to chaining) 
+  
+  // Move classes into header / .cpp files 
+  
+  // Memory usage reductions
 
 ```
+
+### Changes: 
+```cpp
+  map.put(key, value) //Deprecated replaced with:
+  map[key] = value; 
+  
+  auto value = map.get(key); //Deprecated replaced with: 
+  auto value = map[key]; 
+  
+  //Added functionality to support stream output 
+  cout << map[key] << endl; // Output: value 
+  
+  //Added _get helper function to assist get and set 
+ 
+  //Added proxy class as intermediary for [] operations 
+  
+```
+### Valgrind Summary 
+![a3129ea6304a4869b88fc66ad1b88c3d](https://user-images.githubusercontent.com/58617118/175980331-57fbbfb4-3e39-48ac-acf9-34f01b465a10.png)
